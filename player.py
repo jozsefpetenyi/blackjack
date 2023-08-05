@@ -1,0 +1,30 @@
+from typing import Optional
+from hand import Hand
+from strategies.basic_strategy import BasicStrategy
+from strategies.strategy import Strategy
+from exceptions import IRunOutOfChipsException
+
+
+class Player:
+    def __init__(self, name:str, strategy: Strategy, total_number_of_chips: int):
+        self.name = name
+        self.total_number_of_chips = total_number_of_chips
+        self.hand = Hand(cards=[], bet=0)
+        self.strategy = strategy
+
+    def bet(self, amount: int):
+        if self.total_number_of_chips <= 0:
+            raise IRunOutOfChipsException('There is no more chips left')
+
+        if amount > self.total_number_of_chips:
+            self.hand.place_bet(self.total_number_of_chips)
+            self.total_number_of_chips = 0
+
+        self.total_number_of_chips -= amount
+        self.hand.place_bet(amount)
+
+    def won_bet(self, amount: int):
+        self.total_number_of_chips += amount
+
+    def __str__(self):
+        return f'{self.name}: {self.hand}, chips: {self.total_number_of_chips}'
