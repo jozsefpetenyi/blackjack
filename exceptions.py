@@ -5,3 +5,7 @@ class DidNotFindCardException(BaseException):
 class IRunOutOfChipsException(BaseException):
     def __init__(self, *args, **kwargs):
         pass
+
+class LogicError(BaseException):
+    def __init__(self, *args, **kwargs):
+        pass

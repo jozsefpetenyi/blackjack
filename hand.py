@@ -9,6 +9,9 @@ class HandType(Enum):
     hard = auto()
     pair = auto()
 
+    def __repr__(self):
+        return self.name
+
 
 class Hand:
     def __init__(self, cards: list[Card], bet: int):
@@ -26,6 +29,9 @@ class Hand:
 
     def clear_cards(self):
         self.list_of_cards = []
+
+    def get_number_of_cards(self):
+        return len(self.list_of_cards)
 
     def get_sum(self) -> tuple[int, HandType]:
         """

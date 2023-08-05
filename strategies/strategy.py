@@ -5,8 +5,10 @@ from enum import Enum, auto
 class Action(Enum):
     hit = auto()
     stand = auto()
-    double = auto()
+    double_if_possible_otherwise_hit = auto()
+    double_if_possible_otherwise_stand = auto()
     split = auto()
+    double = auto()
 
     def __repr__(self):
         return self.name
