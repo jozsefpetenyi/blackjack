@@ -78,7 +78,6 @@ class Game:
         for player in self.other_players:
             log.debug(player)
 
-    # todo remove this and evaluate it in a diff method
     def check_if_dealer_has_blackjack(self):
         self.dealer.hand.list_of_cards[-1].turn_face_up()
         dealers_sum, _ = self.dealer.hand.get_sum()
@@ -149,6 +148,8 @@ class Game:
     def check_who_won_and_distribute_chips(self):
         log.debug('')
         log.debug('Evaluating hands...')
+        self.dealer.hand.list_of_cards[-1].turn_face_up()
+
         my_sum, _ = self.myself.hand.get_sum()
         dealers_sum, _ = self.dealer.hand.get_sum()
         if my_sum == constants.BLACKJACK and dealers_sum == constants.BLACKJACK:
@@ -185,15 +186,12 @@ class Game:
         self.deal_cards()
 
         if self.check_if_dealer_has_blackjack():
-            log.debug('Dealer won, they have a blackjack')
-            log.debug(self.dealer)
-            # todo what if I have a blackjack as well?
+            log.debug('Dealer has a blackjack, ending turn...')
+            self.check_who_won_and_distribute_chips()
 
-            return GameStatus(round=round, total_number_of_chips=self.myself.total_number_of_chips)
-
-        log.debug(self.dealer)
-        for player in [self.myself] + self.other_players + [self.dealer]:
-            self.execute_actions(player)
+        else:
+            for player in [self.myself] + self.other_players + [self.dealer]:
+                self.execute_actions(player)
 
         self.reshuffle_cards_if_there_are_too_few_cards_in_the_shoe()
         log.debug(f'===== Round {round} ends =====')
