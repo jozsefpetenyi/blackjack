@@ -1,4 +1,5 @@
 from random import shuffle
+
 from deck import Deck
 
 
@@ -7,8 +8,13 @@ class Shoe:
         self.number_of_decks = number_of_decks
 
         self.container = []
+        self.fill_shoe_up_with_decks()
 
-        for i in range(number_of_decks):
+    def clear(self):
+        self.container = []
+
+    def fill_shoe_up_with_decks(self):
+        for i in range(self.number_of_decks):
             self.container.extend(Deck().cards)
 
     def shuffle(self):

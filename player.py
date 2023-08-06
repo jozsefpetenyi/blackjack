@@ -3,6 +3,7 @@ from hand import Hand
 from strategies.basic_strategy import BasicStrategy
 from strategies.strategy import Strategy
 from exceptions import IRunOutOfChipsException
+from constants import log
 
 
 class Player:
@@ -13,6 +14,7 @@ class Player:
         self.strategy = strategy
 
     def bet(self, amount: int):
+        log_statement = f'bet({self.name}: {amount}, from {self.total_number_of_chips} to '
         if self.total_number_of_chips <= 0:
             raise IRunOutOfChipsException('There is no more chips left')
 
@@ -22,6 +24,7 @@ class Player:
 
         self.total_number_of_chips -= amount
         self.hand.place_bet(amount)
+        log.debug(f'{log_statement} {self.total_number_of_chips})')
 
     def won_bet(self, amount: int):
         self.total_number_of_chips += amount

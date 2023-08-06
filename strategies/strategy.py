@@ -10,8 +10,11 @@ class Action(Enum):
     split = auto()
     double = auto()
 
-    def __repr__(self):
+    def __str__(self):
         return self.name
+
+    def __repr__(self):
+        return str(self)
 
 
 class Strategy:

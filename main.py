@@ -1,10 +1,13 @@
 from game import Game
+from strategies.basic_strategy import BasicStrategy
+
 
 if __name__ == '__main__':
     game = Game(number_of_decks=6,
                 number_of_players=4,
                 my_total_number_of_chips=10000,
-                number_of_rounds=10000)
+                number_of_rounds=10000,
+                strategy=BasicStrategy(base_bet=2))
 
     result = game.simulate()
 

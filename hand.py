@@ -9,8 +9,12 @@ class HandType(Enum):
     hard = auto()
     pair = auto()
 
-    def __repr__(self):
+    def __str__(self):
         return self.name
+
+    def __repr__(self):
+        return str(self)
+
 
 
 class Hand:
@@ -83,5 +87,5 @@ class Hand:
         return Hand([self.list_of_cards[0]], self.bet), Hand([self.list_of_cards[1]], self.bet)
 
     def __str__(self):
-        sum, _ = self.get_sum()
-        return f'cards: {self.list_of_cards}: {sum}, bet: {self.bet}'
+        sum, type = self.get_sum()
+        return f'cards: {self.list_of_cards} (sum: {sum}, type: {type}), bet: {self.bet}'

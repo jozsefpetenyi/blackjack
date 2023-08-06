@@ -9,3 +9,7 @@ class IRunOutOfChipsException(BaseException):
 class LogicError(BaseException):
     def __init__(self, *args, **kwargs):
         pass
+
+class ActionIsAgainstTheRulesError(BaseException):
+    def __init__(self, *args, **kwargs):
+        pass
