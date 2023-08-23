@@ -4,6 +4,7 @@ from deck import Deck
 from game import Game
 from shoe import Shoe
 from strategies.basic_strategy import BasicStrategy
+from strategies.strategy import Action
 
 
 # todo add much more unit tests to make sure actions and chip distribution work as expected
@@ -38,7 +39,7 @@ class ActionsTests(unittest.TestCase):
         """
         Helper method for unit testing. This sets the cards in the shoe to the list provided.
         :param shoe: Shoe object that needs to be filled
-        :param letters: list of strings e.g. '1', 'A', '4', '10'. The cards on the left of the list will be drawn first.
+        :param letters: list of strings e.g. '1', 'A', '4', '10'. The cards on the RIGHT of the list will be drawn first.
         :return: None
         """
 
@@ -67,23 +68,52 @@ class ActionsTests(unittest.TestCase):
                     my_total_number_of_chips=10000,
                     number_of_rounds=1,
                     strategy=BasicStrategy(base_bet=BASE_BET))
-        self._setShoeToHaveTheFollowingCards(game.shoe, ['6'] * 100 + ['8', '3', 'J', '4'])
+        self._setShoeToHaveTheFollowingCards(game.shoe, ['6'] * 100 + ['6', '8', '3', 'J', '4'])
 
         result = game.simulate()
 
         self.assertEqual(result[0].total_number_of_chips, 10000)
         self.assertEqual(result[1].total_number_of_chips, 10000 - BASE_BET)
 
-    def testHitAction_oneHitActionOneStand_chipsIncreased(self):
+    def testHitAction_oneHitActionOneStand_chipsIncreased_endedUpWithThreeCards(self):
         BASE_BET = 2
         game = Game(number_of_decks=6,
                     number_of_players=1,
                     my_total_number_of_chips=10000,
                     number_of_rounds=1,
                     strategy=BasicStrategy(base_bet=BASE_BET))
-        self._setShoeToHaveTheFollowingCards(game.shoe, ['8'] * 100 + ['5', '7', '7', 'J'])
+        self._setShoeToHaveTheFollowingCards(game.shoe, ['8', '5', '7', '7', 'J'])
 
         result = game.simulate()
 
+        self.assertEqual(game.myself.actions, [Action.hit, Action.stand])
         self.assertEqual(result[0].total_number_of_chips, 10000)
         self.assertEqual(result[1].total_number_of_chips, 10000 + BASE_BET)
+        self.assertEqual(game.myself.hand.get_number_of_cards(), 3)
+
+    def testHitAction_twoHitActionOneStand_chipsDecreased_endedUpWithFourCards(self):
+        BASE_BET = 2
+        game = Game(number_of_decks=6,
+                    number_of_players=1,
+                    my_total_number_of_chips=10000,
+                    number_of_rounds=1,
+                    strategy=BasicStrategy(base_bet=BASE_BET))
+        self._setShoeToHaveTheFollowingCards(game.shoe, ['4', '2', '2', 'Q', 'A', 'J'])
+
+        result = game.simulate()
+
+        self.assertEqual(game.myself.actions, [Action.hit, Action.hit, Action.stand])
+        self.assertEqual(result[0].total_number_of_chips, 10000)
+        self.assertEqual(result[1].total_number_of_chips, 10000 - BASE_BET)
+        self.assertEqual(game.myself.hand.get_number_of_cards(), 4)
+
+    def testDoubleAction(self):
+        BASE_BET = 2
+        game = Game(number_of_decks=6,
+                    number_of_players=1,
+                    my_total_number_of_chips=10000,
+                    number_of_rounds=1,
+                    strategy=BasicStrategy(base_bet=BASE_BET))
+        self._setShoeToHaveTheFollowingCards(game.shoe, ['10', '3', '7', '8', 'A'])
+
+        result = game.simulate()

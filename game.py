@@ -47,11 +47,14 @@ class Game:
         log.debug("Resetting player hands...")
         self.myself.hand.clear_bet()
         self.myself.hand.clear_cards()
+        self.myself.clear_actions()
         for player in self.other_players:
             player.hand.clear_bet()
             player.hand.clear_cards()
+            player.clear_actions()
         self.dealer.hand.clear_bet()
         self.dealer.hand.clear_cards()
+        self.dealer.clear_actions()
 
     def place_bets(self):
         log.debug("")
@@ -114,6 +117,9 @@ class Game:
                 raise ActionIsAgainstTheRulesError(
                     f'Action {action} is not permitted when player has {player.hand.get_number_of_cards()} cards.')
 
+            # logging action
+            player.add_action(action)
+
             if action == Action.stand:
                 break
             elif action == Action.hit:
@@ -141,6 +147,8 @@ class Game:
             current_sum, _ = player.hand.get_sum()
             if current_sum >= constants.BLACKJACK:
                 break
+
+        log.debug(f'Executed actions: {player.actions}')
 
         if player == self.dealer:
             self.check_who_won_and_distribute_chips()

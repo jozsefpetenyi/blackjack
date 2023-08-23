@@ -1,7 +1,7 @@
 from typing import Optional
 from hand import Hand
 from strategies.basic_strategy import BasicStrategy
-from strategies.strategy import Strategy
+from strategies.strategy import Strategy, Action
 from exceptions import IRunOutOfChipsException
 from constants import log
 
@@ -12,6 +12,7 @@ class Player:
         self.total_number_of_chips = total_number_of_chips
         self.hand = Hand(cards=[], bet=0)
         self.strategy = strategy
+        self.actions: list[Action] = []
 
     def bet(self, amount: int):
         log_statement = f'bet({self.name}: {amount}, from {self.total_number_of_chips} to '
@@ -28,6 +29,12 @@ class Player:
 
     def won_bet(self, amount: int):
         self.total_number_of_chips += amount
+
+    def clear_actions(self):
+        self.actions = []
+
+    def add_action(self, action: Action):
+        self.actions.append(action)
 
     def __str__(self):
         return f'{self.name}: {self.hand}, chips: {self.total_number_of_chips}'
