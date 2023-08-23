@@ -4,6 +4,7 @@ from typing import Optional
 import constants
 from constants import log
 from exceptions import IRunOutOfChipsException, LogicError, ActionIsAgainstTheRulesError
+from hand import Hand
 from player import Player
 from shoe import Shoe
 from strategies.dealers_strategy import DealersStrategy
@@ -35,6 +36,10 @@ class Game:
             Player(name=f"Dummy player {i}", strategy=Strategy(), total_number_of_chips=0)
             for i in range(self.number_of_players - 1)]
         self.dealer = Player(name="Dealer", strategy=DealersStrategy(), total_number_of_chips=0)
+
+    @staticmethod
+    def is_blackjack(hand: Hand):
+        return hand.get_number_of_cards() == 2 and hand.get_sum() == constants.BLACKJACK
 
     def reshuffle_shoe(self):
         self.shoe = Shoe(number_of_decks=self.number_of_decks)
@@ -149,6 +154,7 @@ class Game:
                 break
 
         log.debug(f'Executed actions: {player.actions}')
+        log.debug(f'Final hand: {player.hand}')
 
         if player == self.dealer:
             self.check_who_won_and_distribute_chips()
@@ -158,15 +164,18 @@ class Game:
         log.debug('Evaluating hands...')
         self.dealer.hand.list_of_cards[-1].turn_face_up()
 
+        log.debug(f'My hand: {self.myself.hand}')
+        log.debug(f'Dealer\'s hand: {self.dealer.hand}')
+
         my_sum, _ = self.myself.hand.get_sum()
         dealers_sum, _ = self.dealer.hand.get_sum()
-        if my_sum == constants.BLACKJACK and dealers_sum == constants.BLACKJACK:
+        if self.is_blackjack(self.myself.hand) and self.is_blackjack(self.dealer.hand):
             log.debug(f'Push (both me and the dealer have blackjacks)')
             self.myself.won_bet(self.myself.hand.bet * 1)
-        elif dealers_sum == constants.BLACKJACK:
+        elif self.is_blackjack(self.dealer.hand):
             log.debug(f'Lost (dealer has a blackjack)')
             pass
-        elif my_sum == constants.BLACKJACK:
+        elif self.is_blackjack(self.myself.hand):
             log.debug(f'Won (blackjack)')
             self.myself.won_bet(self.myself.hand.bet * 2.5)
         elif my_sum > dealers_sum:
