@@ -4,7 +4,7 @@ from deck import Deck
 from game import Game
 from shoe import Shoe
 from strategies.basic_strategy import BasicStrategy
-from strategies.strategy import Action
+from strategies.strategy import Action, Outcome
 
 
 # todo add much more unit tests to make sure actions and chip distribution work as expected
@@ -117,3 +117,39 @@ class ActionsTests(unittest.TestCase):
         self._setShoeToHaveTheFollowingCards(game.shoe, ['10', '3', '7', '8', 'A'])
 
         result = game.simulate()
+
+    def testDealerHasABlackjack_lostWithOutcomeBlackjack_noAction_lostMoney_only2CardsInHand(self):
+        BASE_BET = 2
+        game = Game(number_of_decks=6,
+                    number_of_players=1,
+                    my_total_number_of_chips=10000,
+                    number_of_rounds=1,
+                    strategy=BasicStrategy(base_bet=BASE_BET))
+        self._setShoeToHaveTheFollowingCards(game.shoe, ['2', 'A', '2', 'J'])
+
+        result = game.simulate()
+
+        self.assertEqual(game.myself.outcome,  Outcome.lost_dealer_has_a_blackjack)
+        self.assertEqual(game.myself.actions, [])
+        self.assertEqual(result[0].total_number_of_chips, 10000)
+        self.assertEqual(result[1].total_number_of_chips, 10000 - BASE_BET)
+        self.assertEqual(game.myself.hand.get_number_of_cards(), 2)
+
+
+    def testIhaveABlackjack_wonWithABlackJack_moneyIncreasedWithOneAndHalf_have2CardsInHand(self):
+        BASE_BET = 2
+        game = Game(number_of_decks=6,
+                    number_of_players=2,
+                    my_total_number_of_chips=10000,
+                    number_of_rounds=1,
+                    strategy=BasicStrategy(base_bet=BASE_BET))
+        # dealer: 4, me: A, dummy: 4, dealer: 6, me: Q, dummy: 6
+        self._setShoeToHaveTheFollowingCards(game.shoe, ['6'] * 10 + ['Q', '6', '4', 'A', '4'])
+
+        result = game.simulate()
+
+        self.assertEqual(game.myself.outcome, Outcome.won_with_a_blackjack)
+        self.assertEqual(game.myself.actions, [Action.stand])
+        self.assertEqual(result[0].total_number_of_chips, 10000)
+        self.assertEqual(result[1].total_number_of_chips, 10000 + BASE_BET * 1.5)
+        self.assertEqual(game.myself.hand.get_number_of_cards(), 2)

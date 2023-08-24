@@ -8,7 +8,7 @@ from hand import Hand
 from player import Player
 from shoe import Shoe
 from strategies.dealers_strategy import DealersStrategy
-from strategies.strategy import Action, Strategy
+from strategies.strategy import Action, Strategy, Outcome
 
 
 @dataclass
@@ -39,7 +39,10 @@ class Game:
 
     @staticmethod
     def is_blackjack(hand: Hand):
-        return hand.get_number_of_cards() == 2 and hand.get_sum() == constants.BLACKJACK
+        is_2_cards = hand.get_number_of_cards() == 2
+        sum, hand_type = hand.get_sum()
+        is_sum_21 = sum == constants.BLACKJACK
+        return is_2_cards and is_sum_21
 
     def reshuffle_shoe(self):
         self.shoe = Shoe(number_of_decks=self.number_of_decks)
@@ -169,24 +172,40 @@ class Game:
 
         my_sum, _ = self.myself.hand.get_sum()
         dealers_sum, _ = self.dealer.hand.get_sum()
+
         if self.is_blackjack(self.myself.hand) and self.is_blackjack(self.dealer.hand):
-            log.debug(f'Push (both me and the dealer have blackjacks)')
+            self.myself.outcome = Outcome.push_2_blackjacks
             self.myself.won_bet(self.myself.hand.bet * 1)
+
         elif self.is_blackjack(self.dealer.hand):
-            log.debug(f'Lost (dealer has a blackjack)')
+            self.myself.outcome = Outcome.lost_dealer_has_a_blackjack
             pass
+
         elif self.is_blackjack(self.myself.hand):
-            log.debug(f'Won (blackjack)')
+            self.myself.outcome = Outcome.won_with_a_blackjack
             self.myself.won_bet(self.myself.hand.bet * 2.5)
-        elif my_sum > dealers_sum:
-            log.debug(f'Won (sum is higher than dealer\'s)')
-            self.myself.won_bet(self.myself.hand.bet * 2)  # dealer matches my amount
-        elif my_sum == dealers_sum:
-            log.debug(f'Push (sum is equal to dealer\'s)')
-            self.myself.won_bet(self.myself.hand.bet * 1)
-        else:
-            log.debug(f'Lost (sum is lower than dealer\'s)')
+
+        elif my_sum > constants.BLACKJACK:
+            self.myself.outcome = Outcome.lost_bust
             pass
+
+        elif dealers_sum > constants.BLACKJACK:
+            self.myself.outcome = Outcome.won_dealer_busts
+            self.myself.won_bet(self.myself.hand.bet * 2)
+
+        elif my_sum > dealers_sum:
+            self.myself.outcome = Outcome.won_higher_sum
+            self.myself.won_bet(self.myself.hand.bet * 2)  # dealer matches my amount
+
+        elif my_sum == dealers_sum:
+            self.myself.outcome = Outcome.push_equal_sum
+            self.myself.won_bet(self.myself.hand.bet * 1)
+
+        else:
+            self.myself.outcome = Outcome.lost_lower_sum
+            pass
+
+        log.debug(f'{self.myself.outcome}')
 
     def reshuffle_cards_if_there_are_too_few_cards_in_the_shoe(self):
         # todo: check value for CUT in casinos

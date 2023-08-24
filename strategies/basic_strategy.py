@@ -8,9 +8,11 @@ class BasicStrategy(Strategy):
     def __init__(self, base_bet: int):
         super().__init__()
 
-        self.hard_table_path = Path('strategies') / 'basic_strategy_tables' / 'hard.csv'
-        self.soft_table_path = Path('strategies') / 'basic_strategy_tables' / 'soft.csv'
-        self.pair_table_path = Path('strategies') / 'basic_strategy_tables' / 'pair.csv'
+        # folder = Path('strategies') / 'basic_strategy_tables'
+        folder = Path.home() / 'Documents' / 'coding' / 'blackjack' / 'strategies' / 'basic_strategy_tables'
+        self.hard_table_path = folder / 'hard.csv'
+        self.soft_table_path = folder / 'soft.csv'
+        self.pair_table_path = folder / 'pair.csv'
 
         self.base_bet = base_bet
 
